@@ -49,15 +49,8 @@
       font-size: 20px;
     }
 
-    .chat-header .info h2 {
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    .chat-header .info p {
-      font-size: 12px;
-      opacity: 0.85;
-    }
+    .chat-header .info h2 { font-size: 16px; font-weight: 600; }
+    .chat-header .info p { font-size: 12px; opacity: 0.85; }
 
     .chat-messages {
       flex: 1;
@@ -116,9 +109,7 @@
       transition: border 0.2s;
     }
 
-    .chat-input-area input:focus {
-      border-color: #0078d4;
-    }
+    .chat-input-area input:focus { border-color: #0078d4; }
 
     .chat-input-area button {
       background: #0078d4;
@@ -187,15 +178,16 @@ Como posso te ajudar hoje?</div>
   <script>
     const API_KEY = '9169ce7a99cd4e0c9b9281aaf93db900';
     const AGENT_ID = '6a51342db49fe8d296942b7d';
-    const BASE_URL = 'https://api.base44.com/api/agents/' + AGENT_ID;
+    const BASE_URL = 'https://app.base44.com/api/agents/' + AGENT_ID;
 
     let conversationId = null;
 
     async function getOrCreateConversation() {
       if (conversationId) return conversationId;
-      const res = await fetch(`${BASE_URL}/conversations/default`, {
-        method: 'GET',
-        headers: { 'api_key': API_KEY, 'Content-Type': 'application/json' }
+      const res = await fetch(`${BASE_URL}/conversations`, {
+        method: 'POST',
+        headers: { 'api_key': API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
       });
       const data = await res.json();
       conversationId = data.id;
@@ -218,9 +210,7 @@ Como posso te ajudar hoje?</div>
       const text = input.value.trim();
       if (!text) return;
 
-      // Ocultar sugestões após primeira mensagem
       document.getElementById('suggestions').style.display = 'none';
-
       input.value = '';
       btn.disabled = true;
       addMessage(text, 'user');
@@ -235,11 +225,12 @@ Como posso te ajudar hoje?</div>
         });
         const data = await res.json();
         loadingEl.remove();
-        const reply = data?.content || data?.message || 'Não consegui obter uma resposta. Tente novamente.';
+        const reply = data?.content || data?.message || data?.response || JSON.stringify(data);
         addMessage(reply, 'bot');
       } catch (e) {
         loadingEl.remove();
-        addMessage('Erro ao conectar com o assistente. Verifique sua conexão e tente novamente.', 'bot');
+        addMessage('Erro ao conectar. Tente novamente.', 'bot');
+        console.error(e);
       }
 
       btn.disabled = false;
